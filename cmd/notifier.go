@@ -25,7 +25,7 @@ var startCmd = cli.Command{
 		var err error
 		apiServer := api.NewApiServer(c.String("http-listen-addr"))
 
-		log.Infof("connecting to eth addr: %s", c.String("eth-rpc-addr"))
+		log.Infof("eth rpc client with  addr: %s", c.String("eth-rpc-addr"))
 		err = apiServer.InitEthClient(
 			c.String("eth-rpc-addr"),       // host
 			c.String("receiver-conf-path"), // receiver conf path

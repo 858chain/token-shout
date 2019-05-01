@@ -1,5 +1,13 @@
 package notifier
 
+const (
+	EventNameEthBalanceChange = "eth_balance_change_event"
+)
+
+func init() {
+	EventTypeRegistry = append(EventTypeRegistry, EventNameEthBalanceChange)
+}
+
 type EthBalanceChangeEvent struct {
 	meta map[string]interface{}
 }
@@ -15,5 +23,5 @@ func (ethEvent *EthBalanceChangeEvent) GetEvent() map[string]interface{} {
 }
 
 func (ethEvent *EthBalanceChangeEvent) Type() string {
-	return "eth_balance_change_event"
+	return EventNameEthBalanceChange
 }

@@ -4,8 +4,6 @@ import (
 	"github.com/858chain/token-shout/notifier"
 )
 
-var ()
-
 type Client struct {
 	config *Config
 

@@ -4,6 +4,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+var EventTypeRegistry = []string{}
+
 // Engine of notification
 type Notifier struct {
 	receivers map[string]*Receiver

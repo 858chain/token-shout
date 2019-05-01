@@ -26,13 +26,19 @@ var METHODS_SUPPORTED = map[string]string{
 
 type ApiServer struct {
 	httpListenAddr string
-	engine         *gin.Engine
+	// http gin engine instance
+	engine *gin.Engine
 
+	// eth rpc client
 	client *ethclient.Client
 }
 
+// InitEthClient do the config  validation for make initial call to eth backend.
+// Error return if malformat config or rpc server unreachable.
 func (api *ApiServer) InitEthClient(host, receiverConfPath, logDir string) (err error) {
 	cfg := &ethclient.Config{RpcAddr: host}
+
+	// fail fast if receiver config not exists.
 	if _, err := os.Stat(receiverConfPath); err != nil && os.IsNotExist(err) {
 		return err
 	}
@@ -43,7 +49,14 @@ func (api *ApiServer) InitEthClient(host, receiverConfPath, logDir string) (err 
 	}
 	defer file.Close()
 
+	// return error if malformat receiver config file.
 	err = json.NewDecoder(file).Decode(&cfg.DefaultReceivers)
+	if err != nil {
+		return err
+	}
+
+	// Validation Check make sure cfg valid
+	err = cfg.ValidCheck()
 	if err != nil {
 		return err
 	}
@@ -52,9 +65,8 @@ func (api *ApiServer) InitEthClient(host, receiverConfPath, logDir string) (err 
 	return err
 }
 
-//Check
+// Check eth rpc server connectivity.
 func (api *ApiServer) HealthCheck() (err error) {
-
 	err = api.client.Ping()
 	if err != nil {
 		err = errors.Wrap(err, "eth: ")
@@ -63,18 +75,12 @@ func (api *ApiServer) HealthCheck() (err error) {
 	return err
 }
 
+// Hook all HTTP routes and start listen on `addr`
 func NewApiServer(addr string) *ApiServer {
 	apiServer := &ApiServer{
 		httpListenAddr: addr,
 	}
 
-	// build gin.Engine and register routers
-	apiServer.buildEngine()
-
-	return apiServer
-}
-
-func (api *ApiServer) buildEngine() {
 	r := gin.Default()
 
 	// misc API
@@ -85,7 +91,7 @@ func (api *ApiServer) buildEngine() {
 	})
 
 	r.GET("/health", func(c *gin.Context) {
-		err := api.HealthCheck()
+		err := apiServer.HealthCheck()
 		if err != nil {
 			c.JSON(500, gin.H{
 				"message": fmt.Sprint(err),
@@ -103,7 +109,8 @@ func (api *ApiServer) buildEngine() {
 		})
 	})
 
-	api.engine = r
+	apiServer.engine = r
+	return apiServer
 }
 
 func (api *ApiServer) HttpListen() error {

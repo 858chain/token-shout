@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/858chain/token-shout/notifier"
 	"github.com/858chain/token-shout/utils"
@@ -18,6 +19,7 @@ type Config struct {
 	WalletDir        string
 	LogDir           string
 	DefaultReceivers []ReceiverConfig
+	WatchInterval    time.Duration
 }
 
 // Check config is valid.
@@ -70,7 +72,7 @@ func (c *Config) ValidCheck() error {
 }
 
 type ReceiverConfig struct {
-	RetryCount int      `json:"retrycount"`
+	RetryCount uint     `json:"retrycount"`
 	Endpoint   string   `json:"endpoint"`
 	EventTypes []string `json:"eventTypes"`
 }

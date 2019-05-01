@@ -7,8 +7,10 @@ import (
 	"net/http"
 	"time"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/858chain/token-shout/utils"
 )
+
+const HTTP_USER_AGENT = "858Chain/Token-Shout-Agent"
 
 var ErrShouldRetry = errors.New("should retry")
 
@@ -53,15 +55,24 @@ func (r *Receiver) Match(event Event) bool {
 
 // Accept event and spawn new goroutine to post event back to the endpoint.
 func (r *Receiver) Accept(event Event) {
+	utils.L.Debugf("%s accept event %s", r.endpoint, event.Type())
+
 	sendFunc := func(event Event) error {
+		utils.L.Debugf("sending event %s to %s", event.Type(), r.endpoint)
 		buf := bytes.NewBufferString("")
 		err := json.NewEncoder(buf).Encode(event.GetEvent())
 		if err != nil {
-			log.Error(err)
+			utils.L.Error(err)
 			return err
 		}
 
-		post, _ := http.NewRequest(http.MethodPost, r.endpoint, buf)
+		post, err := http.NewRequest(http.MethodPost, r.endpoint, buf)
+		if err != nil {
+			utils.L.Error(err)
+			return err
+		}
+
+		post.Header.Set("User-Agent", HTTP_USER_AGENT)
 		resp, err := r.client.Do(post)
 		if err != nil {
 			return ErrShouldRetry
@@ -75,13 +86,17 @@ func (r *Receiver) Accept(event Event) {
 		return nil
 	}
 
-	go func() {
+	go func(event Event) {
+		err := sendFunc(event)
+		if err == nil {
+			return
+		}
+
 		retryRemains := r.retryCount
-		ticker := time.NewTicker(10 * time.Second)
+		backoffInterval := time.NewTicker(10 * time.Second)
 		for {
 			select {
-			case now := <-ticker.C:
-				log.Println(now)
+			case <-backoffInterval.C:
 				err := sendFunc(event)
 				if err == nil {
 					return
@@ -92,7 +107,7 @@ func (r *Receiver) Accept(event Event) {
 					}
 
 					if retryRemains <= 0 {
-						log.Debugf("stop posting event after n retries")
+						utils.L.Debugf("stop posting event after n retries")
 						return
 					}
 
@@ -100,5 +115,5 @@ func (r *Receiver) Accept(event Event) {
 				}
 			}
 		}
-	}()
+	}(event)
 }

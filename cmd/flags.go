@@ -1,6 +1,8 @@
 package main
 
 import (
+	"time"
+
 	"github.com/urfave/cli"
 )
 
@@ -38,4 +40,10 @@ var receiverConfPathFlag = cli.StringFlag{
 var walletDirFlag = cli.StringFlag{
 	Name:   "wallet-dir",
 	EnvVar: "WALLET_DIR",
+}
+
+var watchIntervalFlag = cli.DurationFlag{
+	Name:   "watch-interval",
+	Value:  time.Duration(20 * time.Second),
+	EnvVar: "WATCH_INTERVAL",
 }

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/858chain/token-shout/utils"
+
 	"github.com/urfave/cli"
 )
 
@@ -21,7 +23,8 @@ func main() {
 	}
 
 	app.Before = func(c *cli.Context) error {
-		return setupLogger(c.String("log-level"), c.String("log-dir"), "json")
+		//return utils.InitLogger(c.String("log-level"), c.String("log-dir"), "json")
+		return utils.InitLogger(c.String("log-dir"))
 	}
 
 	err := app.Run(os.Args)

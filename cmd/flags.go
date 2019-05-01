@@ -1,6 +1,8 @@
 package main
 
 import (
+	"time"
+
 	"github.com/urfave/cli"
 )
 
@@ -21,6 +23,7 @@ var logLevelFlag = cli.StringFlag{
 var logDirFlag = cli.StringFlag{
 	Name:   "log-dir",
 	EnvVar: "LOG_DIR",
+	Value:  "/var/log/",
 }
 
 var ethRpcAddrFlag = cli.StringFlag{
@@ -32,4 +35,15 @@ var ethRpcAddrFlag = cli.StringFlag{
 var receiverConfPathFlag = cli.StringFlag{
 	Name:   "receiver-conf-path",
 	EnvVar: "RECEIVER_CONF_PATH",
+}
+
+var walletDirFlag = cli.StringFlag{
+	Name:   "wallet-dir",
+	EnvVar: "WALLET_DIR",
+}
+
+var watchIntervalFlag = cli.DurationFlag{
+	Name:   "watch-interval",
+	Value:  time.Duration(20 * time.Second),
+	EnvVar: "WATCH_INTERVAL",
 }

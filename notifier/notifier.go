@@ -1,7 +1,9 @@
 package notifier
 
 import (
-	log "github.com/sirupsen/logrus"
+	"context"
+
+	"github.com/858chain/token-shout/utils"
 )
 
 var EventTypeRegistry = []string{}
@@ -15,7 +17,7 @@ type Notifier struct {
 }
 
 // event generation buffer
-const EventBufSize = 10
+const EventBufSize = 2 << 4
 
 func New() *Notifier {
 	return &Notifier{
@@ -43,16 +45,18 @@ func (notifier *Notifier) Stop() {
 	close(notifier.stopCh)
 }
 
-func (notifier *Notifier) Start() {
+func (notifier *Notifier) Start(ctx context.Context) {
 	for {
 		select {
+		case <-ctx.Done():
+			return
 		case <-notifier.stopCh:
 			return
 
 		case event, _ := <-notifier.eventChan:
 			for name, receiver := range notifier.receivers {
 				if receiver.Match(event) {
-					log.Debugf(name, "received", event)
+					utils.L.Debugf(name, "match", event)
 					receiver.Accept(event)
 				}
 			}

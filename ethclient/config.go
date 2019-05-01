@@ -1,19 +1,25 @@
 package ethclient
 
 import (
-	"errors"
 	"fmt"
 	"net/url"
+	"os"
 	"strings"
+	"time"
 
 	"github.com/858chain/token-shout/notifier"
 	"github.com/858chain/token-shout/utils"
+
+	"github.com/pkg/errors"
 )
 
 type Config struct {
 	// rpc addr, should be one of http://, ws://, ipc
 	RpcAddr          string
+	WalletDir        string
+	LogDir           string
 	DefaultReceivers []ReceiverConfig
+	WatchInterval    time.Duration
 }
 
 // Check config is valid.
@@ -22,6 +28,29 @@ func (c *Config) ValidCheck() error {
 		return errors.New("RpcAddr should not empty")
 	}
 
+	if len(c.WalletDir) == 0 {
+		return errors.New("WalletDir should not empty")
+	}
+
+	stat, err := os.Stat(c.WalletDir)
+	if err != nil {
+		return errors.Wrap(err, "WalletDir: ")
+	}
+
+	if !stat.IsDir() {
+		return errors.New("walletDir is not a directory")
+	}
+
+	stat, err = os.Stat(c.LogDir)
+	if err != nil {
+		return errors.Wrap(err, "logDir: ")
+	}
+
+	if !stat.IsDir() {
+		return errors.New("logDir is not a directory")
+	}
+
+	// rpcaddr format check
 	if !(strings.HasPrefix(c.RpcAddr, "http://") ||
 		strings.HasPrefix(c.RpcAddr, "ws://") ||
 		strings.HasSuffix(c.RpcAddr, ".ipc")) {
@@ -43,7 +72,7 @@ func (c *Config) ValidCheck() error {
 }
 
 type ReceiverConfig struct {
-	RetryCount int      `json:"retrycount"`
+	RetryCount uint     `json:"retrycount"`
 	Endpoint   string   `json:"endpoint"`
 	EventTypes []string `json:"eventTypes"`
 }

@@ -17,6 +17,8 @@ var startCmd = cli.Command{
 		httpAddrFlag,
 		ethRpcAddrFlag,
 		receiverConfPathFlag,
+		walletDirFlag,
+		watchIntervalFlag,
 	},
 
 	Usage: "start eth/erc20 token notification service",
@@ -29,7 +31,9 @@ var startCmd = cli.Command{
 		err = apiServer.InitEthClient(
 			c.String("eth-rpc-addr"),       // host
 			c.String("receiver-conf-path"), // receiver conf path
-			c.GlobalString("log-dir"),      // logDir
+			c.String("wallet-dir"),
+			c.GlobalString("log-dir"), // logDir
+			c.Duration("watch-interval"),
 		)
 		if err != nil {
 			log.Error(err)

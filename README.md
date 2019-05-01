@@ -3,7 +3,7 @@ from repeatly querying for any event/balance change from ethreum chains.
 
 ## Run
 
-## Run In Docker(need connectivity golang.org/x/XXXX in docker build)
+## Run In Docker()
 
 
 ## How to config

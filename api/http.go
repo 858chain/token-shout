@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/858chain/token-shout/ethclient"
 
@@ -35,8 +36,14 @@ type ApiServer struct {
 
 // InitEthClient do the config  validation for make initial call to eth backend.
 // Error return if malformat config or rpc server unreachable.
-func (api *ApiServer) InitEthClient(host, receiverConfPath, logDir string) (err error) {
-	cfg := &ethclient.Config{RpcAddr: host}
+func (api *ApiServer) InitEthClient(host, receiverConfPath, walletDir,
+	logDir string, watchInterval time.Duration) (err error) {
+	cfg := &ethclient.Config{
+		RpcAddr:       host,
+		WalletDir:     walletDir,
+		LogDir:        logDir,
+		WatchInterval: watchInterval,
+	}
 
 	// fail fast if receiver config not exists.
 	if _, err := os.Stat(receiverConfPath); err != nil && os.IsNotExist(err) {
@@ -62,7 +69,11 @@ func (api *ApiServer) InitEthClient(host, receiverConfPath, logDir string) (err 
 	}
 
 	api.client, err = ethclient.New(cfg)
-	return err
+	if err != nil {
+		return err
+	}
+
+	return api.client.Start()
 }
 
 // Check eth rpc server connectivity.

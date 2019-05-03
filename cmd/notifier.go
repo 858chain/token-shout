@@ -12,7 +12,7 @@ import (
 
 var startCmd = cli.Command{
 	Name:    "start",
-	Aliases: []string{"r"},
+	Aliases: []string{"s"},
 	Flags: []cli.Flag{
 		httpAddrFlag,
 		ethRpcAddrFlag,

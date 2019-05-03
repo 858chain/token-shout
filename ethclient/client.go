@@ -44,11 +44,7 @@ func New(config *Config) (*Client, error) {
 
 	// install all default receivers
 	for _, rc := range client.config.DefaultReceivers {
-		receiver := notifier.NewReceiver(
-			rc.Endpoint,
-			rc.EventTypes,
-			rc.RetryCount,
-		)
+		receiver := notifier.NewReceiver(rc)
 
 		uuidIns, _ := uuid.NewUUID()
 		client.noti.InstallReceiver(uuidIns.String(), receiver)
@@ -154,6 +150,7 @@ func (c *Client) balanceCacheSyncer(ctx context.Context, errCh chan error) {
 	}
 }
 
+// getBalance call eth rpc and return balance in float64 format
 func (c *Client) getBalance(address string) (float64, error) {
 	utils.L.Debugf("get balance for address %s", address)
 
@@ -168,6 +165,7 @@ func (c *Client) getBalance(address string) (float64, error) {
 	return float64Value, nil
 }
 
+// balanceChecker periodically check balance of all known addresses.
 func (c *Client) balanceChecker(ctx context.Context, errCh chan error) {
 	ticker := time.NewTicker(c.config.WatchInterval)
 
@@ -187,6 +185,7 @@ func (c *Client) balanceChecker(ctx context.Context, errCh chan error) {
 					"address":    address,
 					"newBalance": newBalance,
 					"balance":    balance,
+					"to":         address,
 				})
 				c.noti.EventChan() <- event
 
@@ -209,6 +208,7 @@ func (c *Client) balanceChecker(ctx context.Context, errCh chan error) {
 	}
 }
 
+// turn wei in big.Int into ether in big.Float
 func weiToEther(wei *big.Int) *big.Float {
 	weiFloat := new(big.Float)
 	weiFloat.SetString(wei.String())

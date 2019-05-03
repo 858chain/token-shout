@@ -25,3 +25,19 @@ func (ethEvent *EthBalanceChangeEvent) GetEvent() map[string]interface{} {
 func (ethEvent *EthBalanceChangeEvent) Type() string {
 	return EventNameEthBalanceChange
 }
+
+func (ethEvent *EthBalanceChangeEvent) From() string {
+	if from, found := ethEvent.meta["from"]; !found {
+		return ""
+	} else {
+		return from.(string)
+	}
+}
+
+func (ethEvent *EthBalanceChangeEvent) To() string {
+	if to, found := ethEvent.meta["to"]; !found {
+		return ""
+	} else {
+		return to.(string)
+	}
+}

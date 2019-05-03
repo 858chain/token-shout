@@ -1,14 +1,11 @@
 package ethclient
 
 import (
-	"fmt"
-	"net/url"
 	"os"
 	"strings"
 	"time"
 
 	"github.com/858chain/token-shout/notifier"
-	"github.com/858chain/token-shout/utils"
 
 	"github.com/pkg/errors"
 )
@@ -18,7 +15,7 @@ type Config struct {
 	RpcAddr          string
 	WalletDir        string
 	LogDir           string
-	DefaultReceivers []ReceiverConfig
+	DefaultReceivers []notifier.ReceiverConfig
 	WatchInterval    time.Duration
 }
 
@@ -65,35 +62,6 @@ func (c *Config) ValidCheck() error {
 	for _, receiverConf := range c.DefaultReceivers {
 		if err := receiverConf.ValidCheck(); err != nil {
 			return err
-		}
-	}
-
-	return nil
-}
-
-type ReceiverConfig struct {
-	RetryCount uint     `json:"retrycount"`
-	Endpoint   string   `json:"endpoint"`
-	EventTypes []string `json:"eventTypes"`
-}
-
-func (rc ReceiverConfig) ValidCheck() error {
-	if rc.RetryCount <= 0 {
-		return errors.New("retryCount should greater than 0")
-	}
-
-	if _, err := url.Parse(rc.Endpoint); err != nil {
-		return err
-	}
-
-	if len(rc.EventTypes) == 0 {
-		errors.New("eventTypes not provided")
-	}
-
-	// EventType should registered.
-	for _, etype := range rc.EventTypes {
-		if !utils.StringSliceContains(notifier.EventTypeRegistry, etype) {
-			return errors.New(fmt.Sprintf("%s not a valid event type, make sure in %+v", etype, notifier.EventTypeRegistry))
 		}
 	}
 

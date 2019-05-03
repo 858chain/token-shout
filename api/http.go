@@ -62,6 +62,7 @@ func (api *ApiServer) InitEthClient(host, receiverConfPath, walletDir,
 		return err
 	}
 
+	fmt.Fprintln(os.Stdout, cfg)
 	// Validation Check make sure cfg valid
 	err = cfg.ValidCheck()
 	if err != nil {

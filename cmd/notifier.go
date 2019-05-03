@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/858chain/token-shout/api"
+	"github.com/858chain/token-shout/ethclient"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
@@ -15,11 +16,12 @@ var startCmd = cli.Command{
 	Aliases: []string{"s"},
 	Flags: []cli.Flag{
 		httpAddrFlag,
-		ethRpcAddrFlag,
-		receiverConfPathFlag,
-		walletDirFlag,
-		watchIntervalFlag,
-		watchFlag,
+		rpcAddrFlag,
+		receiversConfPathFlag,
+		ethWalletDirFlag,
+		ethWatchIntervalFlag,
+		ERC20ContractsDirFlag,
+		watchListFlag,
 	},
 
 	Usage: "start eth/erc20 token notification service",
@@ -28,15 +30,26 @@ var startCmd = cli.Command{
 		var err error
 		apiServer := api.NewApiServer(c.String("http-listen-addr"))
 
-		log.Infof("eth rpc client with  addr: %s", c.String("eth-rpc-addr"))
-		err = apiServer.InitEthClient(
-			c.String("eth-rpc-addr"),       // host
-			c.String("receiver-conf-path"), // receiver conf path
-			c.String("wallet-dir"),
-			c.GlobalString("log-dir"), // logDir
-			c.Duration("watch-interval"),
-			c.String("watch"),
-		)
+		cfg := &ethclient.Config{
+			RpcAddr:   c.String("rpc-addr"), // host
+			WatchList: ethclient.WatchList(c.String("watch-list")),
+			LogDir:    c.GlobalString("log-dir"),
+
+			ReceiversConfPath: c.String("receivers-conf-path"),
+
+			EthWalletDir:      c.String("eth-wallet-dir"),
+			EthWatchInterval:  c.Duration("eth-watch-interval"),
+			ERC20ContractsDir: c.String("erc20-contracts-dir"),
+		}
+
+		fmt.Fprintf(os.Stdout, "%#v\n", cfg)
+		// Validation Check make sure cfg valid
+		err = cfg.SanityAndValidCheck()
+		if err != nil {
+			return err
+		}
+
+		err = apiServer.InitAndStartEthClient(cfg)
 		if err != nil {
 			log.Error(err)
 			return err

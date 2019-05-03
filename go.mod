@@ -1,6 +1,7 @@
 module github.com/858chain/token-shout
 
 require (
+	github.com/allegro/bigcache v1.2.0 // indirect
 	github.com/aristanetworks/goarista v0.0.0-20190429220743-799535f6f364 // indirect
 	github.com/deckarep/golang-set v1.7.1 // indirect
 	github.com/ethereum/go-ethereum v1.8.27
@@ -15,6 +16,7 @@ require (
 	github.com/pkg/errors v0.8.1
 	github.com/rs/cors v1.6.0 // indirect
 	github.com/sirupsen/logrus v1.4.1
+	github.com/syndtr/goleveldb v1.0.0 // indirect
 	github.com/ugorji/go v1.1.4 // indirect
 	github.com/urfave/cli v1.20.0
 	golang.org/x/crypto v0.0.0-20190426145343-a29dc8fdc734 // indirect

@@ -22,7 +22,7 @@ func (c *Client) balanceCacheSyncer(ctx context.Context, errCh chan error) {
 	}
 	defer watcher.Close()
 
-	watcher.Add(c.config.WalletDir)
+	watcher.Add(c.config.EthWalletDir)
 
 	for {
 		select {
@@ -67,7 +67,7 @@ func (c *Client) getBalance(address string) (float64, error) {
 
 // balanceChecker periodically check balance of all known addresses.
 func (c *Client) balanceChecker(ctx context.Context, errCh chan error) {
-	ticker := time.NewTicker(c.config.WatchInterval)
+	ticker := time.NewTicker(c.config.EthWatchInterval)
 
 	checkFunc := func() {
 		utils.L.Infof("checking balance of total %d address", len(c.balanceCache))

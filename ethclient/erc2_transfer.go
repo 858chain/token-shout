@@ -2,56 +2,106 @@ package ethclient
 
 import (
 	"context"
-	//"github.com/ethereum/go-ethereum/common"
-	//"github.com/ethereum/go-ethereum/types"
+	"fmt"
+	"math/big"
+	"strings"
+
+	"github.com/858chain/token-shout/notifier"
+	"github.com/858chain/token-shout/utils"
+
+	ethereum "github.com/ethereum/go-ethereum"
+	"github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/core/types"
 )
 
 func (c *Client) erc20TranserWatcher(ctx context.Context, errCh chan error) {
-	//contractAddress := common.HexToAddress("0x0d8775f648430679a709e98d2b0cb6250d2887ef")
+	query := ethereum.FilterQuery{
+		Addresses: []common.Address{},
+	}
 
-	//query := ethereum.FilterQuery{
-	//Addresses: []common.Address{contractAddress},
-	//}
+	addressABIMap := make(map[common.Address][]byte)
+	for _, cc := range c.config.ContractConfigs {
+		query.Addresses = append(query.Addresses, common.HexToAddress(cc.Address))
+		addressABIMap[common.HexToAddress(cc.Address)] = cc.Abi
+	}
+	fmt.Println("xxxxxxxxxxxxxxxxxxxxxxx1111111111111111")
 
-	//var ch = make(chan types.Log)
-	//ctx := context.Background()
+	var ch = make(chan types.Log)
+	filterCtx := context.Background()
+	sub, err := c.rpcClient.EthSubscribe(filterCtx, ch, "logs", toFilterArg(query))
+	if err != nil {
+		fmt.Println(err)
+		utils.L.Error(err)
+		errCh <- err
+		return
+	}
+	fmt.Println("xxxxxxxxxxxxxxxxxxxxxxx")
 
-	//sub, err := c.rpcClient.SubscribeFilterLogs(ctx, query, ch)
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case err := <-sub.Err():
+			utils.L.Error(err)
+			errCh <- err
+			return
+		case eventLog := <-ch:
+			if abiBytes, found := addressABIMap[eventLog.Address]; found {
+				tokenAbi, err := abi.JSON(strings.NewReader(string(abiBytes)))
+				if err != nil {
+					utils.L.Error(err)
+					errCh <- err
+					return
+				}
+				var transferEvent struct {
+					From  common.Address
+					To    common.Address
+					Value *big.Int
+				}
 
-	//if err != nil {
-	//log.Fatal(err)
-	//}
+				err = tokenAbi.Unpack(&transferEvent, "Transfer", eventLog.Data)
+				if err != nil {
+					utils.L.Debugf("Failed to unpack transfer event, try next event")
+					continue
+				}
 
-	//tokenAbi, err := abi.JSON(strings.NewReader(string(token.TokenABI)))
+				transferEvent.From = common.BytesToAddress(eventLog.Topics[1].Bytes())
+				transferEvent.To = common.BytesToAddress(eventLog.Topics[2].Bytes())
 
-	//if err != nil {
-	//log.Fatal(err)
-	//}
+				utils.L.Info("From", transferEvent.From.Hex())
+				utils.L.Info("To", transferEvent.To.Hex())
+				utils.L.Info("Value", transferEvent.Value)
 
-	//for {
-	//select {
-	//case err := <-sub.Err():
-	//log.Fatal(err)
-	//case eventLog := <-ch:
-	//var transferEvent struct {
-	//From  common.Address
-	//To    common.Address
-	//Value *big.Int
-	//}
+				event := notifier.NewERC20LogEvent(map[string]interface{}{
+					"address": eventLog.Address.Hex(),
+					"from":    transferEvent.From.Hex(),
+					"to":      transferEvent.To.Hex(),
+					"value":   transferEvent.Value.Int64(),
+				})
+				c.noti.EventChan() <- event
+			}
+		}
+	}
+}
 
-	//err = tokenAbi.Unpack(&transferEvent, "Transfer", eventLog.Data)
+func toFilterArg(q ethereum.FilterQuery) interface{} {
+	arg := map[string]interface{}{
+		"fromBlock": toBlockNumArg(q.FromBlock),
+		"toBlock":   toBlockNumArg(q.ToBlock),
+		"address":   q.Addresses,
+		"topics":    q.Topics,
+	}
+	if q.FromBlock == nil {
+		arg["fromBlock"] = "0x0"
+	}
+	return arg
+}
 
-	//if err != nil {
-	//log.Println("Failed to unpack")
-	//continue
-	//}
-
-	//transferEvent.From = common.BytesToAddress(eventLog.Topics[1].Bytes())
-	//transferEvent.To = common.BytesToAddress(eventLog.Topics[2].Bytes())
-
-	//log.Println("From", transferEvent.From.Hex())
-	//log.Println("To", transferEvent.To.Hex())
-	//log.Println("Value", transferEvent.Value)
-	//}
-	//}
+func toBlockNumArg(number *big.Int) string {
+	if number == nil {
+		return "latest"
+	}
+	return hexutil.EncodeBig(number)
 }

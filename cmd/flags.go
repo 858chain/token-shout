@@ -26,30 +26,36 @@ var logDirFlag = cli.StringFlag{
 	Value:  "/var/log/",
 }
 
-var ethRpcAddrFlag = cli.StringFlag{
-	Name:   "eth-rpc-addr",
+var rpcAddrFlag = cli.StringFlag{
+	Name:   "rpc-addr",
 	Value:  "http://192.168.0.101:8545",
-	EnvVar: "ETH_RPCADDR",
+	EnvVar: "RPCADDR",
 }
 
-var receiverConfPathFlag = cli.StringFlag{
-	Name:   "receiver-conf-path",
-	EnvVar: "RECEIVER_CONF_PATH",
+var receiversConfPathFlag = cli.StringFlag{
+	Name:   "receivers-conf-path",
+	EnvVar: "RECEIVERS_CONF_PATH",
 }
 
-var walletDirFlag = cli.StringFlag{
-	Name:   "wallet-dir",
-	EnvVar: "WALLET_DIR",
+var ethWalletDirFlag = cli.StringFlag{
+	Name:   "eth-wallet-dir",
+	EnvVar: "ETH_WALLET_DIR",
 }
 
-var watchIntervalFlag = cli.DurationFlag{
-	Name:   "watch-interval",
+var ethWatchIntervalFlag = cli.DurationFlag{
+	Name:   "eth-watch-interval",
 	Value:  time.Duration(20 * time.Second),
-	EnvVar: "WATCH_INTERVAL",
+	EnvVar: "ETH_WATCH_INTERVAL",
 }
 
-var watchFlag = cli.StringFlag{
-	Name:   "watch",
-	Value:  "erc20,eth",
-	EnvVar: "WATCH",
+var watchListFlag = cli.StringFlag{
+	Name:   "watch-list",
+	Value:  "usdt,eth",
+	EnvVar: "WATCH_LIST",
+}
+
+var ERC20ContractsDirFlag = cli.StringFlag{
+	Name:   "erc20-contracts-dir",
+	Value:  "",
+	EnvVar: "ERC20_CONTRACTS_DIR",
 }

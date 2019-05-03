@@ -8,7 +8,7 @@ import (
 
 var httpAddrFlag = cli.StringFlag{
 	Name:   "http-listen-addr",
-	Value:  "0.0.0.0:8000",
+	Value:  "0.0.0.0:8001",
 	Usage:  "http address of web application",
 	EnvVar: "HTTP_LISTEN_ADDR",
 }

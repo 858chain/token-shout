@@ -1,10 +1,23 @@
+FROM golang:1.12.1-alpine3.9 as builder
+
+WORKDIR /go/src/app
+
+RUN apk add git && apk add make && apk add gcc && apk add libc-dev  \
+  && apk add --update gcc musl-dev
+
+ENV GOPROXY=https://goproxy.io
+ADD . .
+
+RUN make
+
+
+
 FROM alpine:latest
 
-ARG BINARY
-ADD ./bin/${BINARY} /wallet-keeper
+COPY --from=builder /go/src/app/bin/token-shout /
 
-
-EXPOSE 8000
+EXPOSE 8001
 WORKDIR /
 
-CMD ["/wallet-keeper", "run"]
+CMD ["/token-shout", "run"]
+

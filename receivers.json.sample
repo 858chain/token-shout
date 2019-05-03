@@ -1,4 +1,0 @@
-[
-  {"endpoint": "http://exmaple.com/callback", "eventTypes": ["eth_balance_change_event", "other_event"], "retryCount": 1},
-  {"endpoint": "http://exmaple2.com/callback", "eventTypes": ["eth_balance_change_event", "other_event"], "retryCount": 2}
-]

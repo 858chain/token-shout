@@ -20,18 +20,22 @@ func ShouldRetry(err error) bool {
 
 // Receiver receive event notfication
 type Receiver struct {
-	retryCount uint     `json:"retryCount"`
-	endpoint   string   `json:"endpoint"`
-	eventTypes []string `json:"evnetTypes"`
+	retryCount    uint     `json:"retryCount"`
+	endpoint      string   `json:"endpoint"`
+	eventTypes    []string `json:"evnetTypes"`
+	fromAddresses []string `json:"from"`
+	toAddresses   []string `json:"to"`
 
 	client *http.Client `json:"-"`
 }
 
-func NewReceiver(endpoint string, eventTypes []string, retriesCount uint) *Receiver {
+func NewReceiver(cfg ReceiverConfig) *Receiver {
 	return &Receiver{
-		retryCount: retriesCount,
-		endpoint:   endpoint,
-		eventTypes: eventTypes,
+		retryCount:    cfg.RetryCount,
+		endpoint:      cfg.Endpoint,
+		eventTypes:    cfg.EventTypes,
+		fromAddresses: cfg.FromAddresses,
+		toAddresses:   cfg.ToAddresses,
 		client: &http.Client{
 			Transport: &http.Transport{
 				MaxIdleConns:       10,

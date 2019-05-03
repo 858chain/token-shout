@@ -49,12 +49,22 @@ func NewReceiver(cfg ReceiverConfig) *Receiver {
 // Check if event type in receivier's eventTypes
 func (r *Receiver) Match(event Event) bool {
 	for _, et := range r.eventTypes {
-		if et == event.Type() {
+		if et == event.Type() &&
+			r.fromAddrMatch(event) &&
+			r.toAddrMatch(event) {
 			return true
 		}
 	}
 
 	return false
+}
+
+func (r *Receiver) fromAddrMatch(event Event) bool {
+	return true
+}
+
+func (r *Receiver) toAddrMatch(event Event) bool {
+	return true
 }
 
 // Accept event and spawn new goroutine to post event back to the endpoint.

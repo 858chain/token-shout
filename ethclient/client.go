@@ -2,6 +2,7 @@ package ethclient
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"math"
@@ -114,15 +115,26 @@ func (c *Client) loadAddressesFromWallet() ([]string, error) {
 	}
 
 	for _, fileInfo := range files {
-		address := fmt.Sprintf("0x%s", utils.LastSplit(fileInfo.Name(), "-"))
-		if common.IsHexAddress(address) {
-			addresses = append(addresses, address)
+		address, err := c.addressFromFilename(fileInfo.Name())
+		if err != nil {
+			return []string{}, err
 		}
+		addresses = append(addresses, address)
 	}
 
 	return addresses, nil
 }
 
+// parse address from wallet filename
+func (c *Client) addressFromFilename(filename string) (string, error) {
+	address := fmt.Sprintf("0x%s", utils.LastSplit(filename, "-"))
+	if common.IsHexAddress(address) {
+		return address, nil
+	}
+	return "", errors.New("not a valid address")
+}
+
+// syncer of balance, detecting balance change.
 func (c *Client) balanceCacheSyncer(ctx context.Context, errCh chan error) {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
@@ -140,7 +152,16 @@ func (c *Client) balanceCacheSyncer(ctx context.Context, errCh chan error) {
 		// watch for events
 		case event := <-watcher.Events:
 			if event.Op&fsnotify.Create == fsnotify.Create {
-				fmt.Println("created file: 3", event.Name)
+				utils.L.Infof("created file: %s", event.Name)
+				address, err := c.addressFromFilename(event.Name)
+				if err == nil {
+					balance, err := c.getBalance(address)
+					if err == nil {
+						c.lock.Lock()
+						c.balanceCache[address] = balance
+						c.lock.Unlock()
+					}
+				}
 			}
 
 		case err := <-watcher.Errors:

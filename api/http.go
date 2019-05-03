@@ -1,10 +1,7 @@
 package api
 
 import (
-	"encoding/json"
 	"fmt"
-	"os"
-	"time"
 
 	"github.com/858chain/token-shout/ethclient"
 
@@ -36,40 +33,7 @@ type ApiServer struct {
 
 // InitEthClient do the config  validation for make initial call to eth backend.
 // Error return if malformat config or rpc server unreachable.
-func (api *ApiServer) InitEthClient(host, receiverConfPath, walletDir,
-	logDir string, watchInterval time.Duration, watch string) (err error) {
-	cfg := &ethclient.Config{
-		RpcAddr:       host,
-		WalletDir:     walletDir,
-		LogDir:        logDir,
-		WatchInterval: watchInterval,
-		Watch:         ethclient.Watch(watch),
-	}
-
-	// fail fast if receiver config not exists.
-	if _, err := os.Stat(receiverConfPath); err != nil && os.IsNotExist(err) {
-		return err
-	}
-
-	file, err := os.OpenFile(receiverConfPath, os.O_RDONLY, 0755)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	// return error if malformat receiver config file.
-	err = json.NewDecoder(file).Decode(&cfg.DefaultReceivers)
-	if err != nil {
-		return err
-	}
-
-	fmt.Fprintln(os.Stdout, cfg)
-	// Validation Check make sure cfg valid
-	err = cfg.ValidCheck()
-	if err != nil {
-		return err
-	}
-
+func (api *ApiServer) InitAndStartEthClient(cfg *ethclient.Config) (err error) {
 	api.client, err = ethclient.New(cfg)
 	if err != nil {
 		return err

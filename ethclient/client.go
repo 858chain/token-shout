@@ -38,32 +38,9 @@ func New(config *Config) (*Client, error) {
 		balanceCache: make(map[string]float64),
 	}
 
-	// install all default receivers
-	for _, rc := range client.config.DefaultReceivers {
-		receiver := notifier.NewReceiver(rc)
-
-		uuidIns, _ := uuid.NewUUID()
-		client.noti.InstallReceiver(uuidIns.String(), receiver)
-	}
-
-	// connect to geth rpc
 	err := client.connect()
 	if err != nil {
 		return nil, err
-	}
-
-	// parse all account address from wallet directory
-	addresses, err := client.loadAddressesFromWallet()
-	if err != nil {
-		return nil, err
-	}
-	for _, addr := range addresses {
-		utils.L.Debugf("start watch address %s", addr)
-
-		client.balanceCache[addr], err = client.getBalance(addr)
-		if err != nil {
-			return nil, err
-		}
 	}
 
 	return client, nil
@@ -75,12 +52,34 @@ func (c *Client) Start() error {
 	go c.noti.Start(ctx)
 
 	// if asked to watch eth
-	if c.config.Watch.Contains("eth") {
+	if c.config.WatchList.Contains("eth") {
+		// install all default receivers
+		for _, rc := range c.config.DefaultReceivers {
+			receiver := notifier.NewReceiver(rc)
+
+			uuidIns, _ := uuid.NewUUID()
+			c.noti.InstallReceiver(uuidIns.String(), receiver)
+		}
+
+		// parse all account address from wallet directory
+		addresses, err := c.loadAddressesFromWallet()
+		if err != nil {
+			return err
+		}
+		for _, addr := range addresses {
+			utils.L.Debugf("start watch address %s", addr)
+
+			c.balanceCache[addr], err = c.getBalance(addr)
+			if err != nil {
+				return err
+			}
+		}
+
 		go c.balanceCacheSyncer(ctx, errCh)
 		go c.balanceChecker(ctx, errCh)
 	}
 
-	if c.config.Watch.Contains("erc20") {
+	if len(c.config.WatchList.ExceptEth()) > 0 {
 		go c.erc20TranserWatcher(ctx, errCh)
 	}
 
@@ -112,7 +111,7 @@ func (c *Client) connect() (err error) {
 func (c *Client) loadAddressesFromWallet() ([]string, error) {
 	addresses := make([]string, 0)
 
-	files, err := ioutil.ReadDir(c.config.WalletDir)
+	files, err := ioutil.ReadDir(c.config.EthWalletDir)
 	if err != nil {
 		return addresses, err
 	}

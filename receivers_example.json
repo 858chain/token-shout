@@ -1,7 +1,8 @@
 [
   {"endpoint": "http://exmaple.com/callback",
     "eventTypes": [
-      "eth_balance_change_event"
+      "eth_balance_change_event",
+      "erc20_log_event"
     ],
     "retryCount": 1,
     "from": ["*"],

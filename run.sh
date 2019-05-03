@@ -7,4 +7,5 @@
   --eth-rpc-addr http://154.8.201.160:8545 \
   --receiver-conf-path /tmp/receivers \
   --wallet-dir /tmp/wallets \
-  --watch-interval 20s
+  --watch-interval 20s \
+  --watch eth,erc20

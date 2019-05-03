@@ -37,12 +37,13 @@ type ApiServer struct {
 // InitEthClient do the config  validation for make initial call to eth backend.
 // Error return if malformat config or rpc server unreachable.
 func (api *ApiServer) InitEthClient(host, receiverConfPath, walletDir,
-	logDir string, watchInterval time.Duration) (err error) {
+	logDir string, watchInterval time.Duration, watch string) (err error) {
 	cfg := &ethclient.Config{
 		RpcAddr:       host,
 		WalletDir:     walletDir,
 		LogDir:        logDir,
 		WatchInterval: watchInterval,
+		Watch:         ethclient.Watch(watch),
 	}
 
 	// fail fast if receiver config not exists.

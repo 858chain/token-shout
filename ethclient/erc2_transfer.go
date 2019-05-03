@@ -2,7 +2,6 @@ package ethclient
 
 import (
 	"context"
-	"fmt"
 	"math/big"
 	"strings"
 
@@ -19,6 +18,7 @@ import (
 func (c *Client) erc20TranserWatcher(ctx context.Context, errCh chan error) {
 	query := ethereum.FilterQuery{
 		Addresses: []common.Address{},
+		FromBlock: new(big.Int).SetInt64(5527022),
 	}
 
 	addressABIMap := make(map[common.Address][]byte)
@@ -26,18 +26,15 @@ func (c *Client) erc20TranserWatcher(ctx context.Context, errCh chan error) {
 		query.Addresses = append(query.Addresses, common.HexToAddress(cc.Address))
 		addressABIMap[common.HexToAddress(cc.Address)] = cc.Abi
 	}
-	fmt.Println("xxxxxxxxxxxxxxxxxxxxxxx1111111111111111")
 
 	var ch = make(chan types.Log)
 	filterCtx := context.Background()
 	sub, err := c.rpcClient.EthSubscribe(filterCtx, ch, "logs", toFilterArg(query))
 	if err != nil {
-		fmt.Println(err)
 		utils.L.Error(err)
 		errCh <- err
 		return
 	}
-	fmt.Println("xxxxxxxxxxxxxxxxxxxxxxx")
 
 	for {
 		select {
@@ -48,6 +45,7 @@ func (c *Client) erc20TranserWatcher(ctx context.Context, errCh chan error) {
 			errCh <- err
 			return
 		case eventLog := <-ch:
+			utils.L.Debug(eventLog)
 			if abiBytes, found := addressABIMap[eventLog.Address]; found {
 				tokenAbi, err := abi.JSON(strings.NewReader(string(abiBytes)))
 				if err != nil {

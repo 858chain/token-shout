@@ -6,7 +6,7 @@
   --http-listen-addr 0.0.0.0:8081 \
   --rpc-addr ws://107.150.126.20:9546 \
   --receivers-conf-path /tmp/receivers \
-  --watch-list eth,usdt,dusd \
+  --watch-list eth,usdt,dusd,tst \
   --eth-wallet-dir /tmp/wallets \
   --eth-watch-interval 20s \
   --erc20-contracts-dir /tmp/contracts

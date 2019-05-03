@@ -19,6 +19,7 @@ var startCmd = cli.Command{
 		receiverConfPathFlag,
 		walletDirFlag,
 		watchIntervalFlag,
+		watchFlag,
 	},
 
 	Usage: "start eth/erc20 token notification service",
@@ -34,6 +35,7 @@ var startCmd = cli.Command{
 			c.String("wallet-dir"),
 			c.GlobalString("log-dir"), // logDir
 			c.Duration("watch-interval"),
+			c.String("watch"),
 		)
 		if err != nil {
 			log.Error(err)

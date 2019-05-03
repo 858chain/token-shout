@@ -2,7 +2,6 @@ package notifier
 
 import (
 	"bytes"
-	"encoding/json"
 	"errors"
 	"net/http"
 	"time"
@@ -49,12 +48,24 @@ func NewReceiver(cfg ReceiverConfig) *Receiver {
 // Check if event type in receivier's eventTypes
 func (r *Receiver) Match(event Event) bool {
 	for _, et := range r.eventTypes {
-		if et == event.Type() {
+		if et == event.Type() &&
+			r.fromAddrMatch(event) &&
+			r.toAddrMatch(event) {
 			return true
 		}
 	}
 
 	return false
+}
+
+// TODO
+func (r *Receiver) fromAddrMatch(event Event) bool {
+	return true
+}
+
+// DODO
+func (r *Receiver) toAddrMatch(event Event) bool {
+	return true
 }
 
 // Accept event and spawn new goroutine to post event back to the endpoint.
@@ -63,14 +74,12 @@ func (r *Receiver) Accept(event Event) {
 
 	sendFunc := func(event Event) error {
 		utils.L.Debugf("sending event %s to %s", event.Type(), r.endpoint)
-		buf := bytes.NewBufferString("")
-		err := json.NewEncoder(buf).Encode(event.GetEvent())
+		eventBytes, err := EncodeEvent(event)
 		if err != nil {
 			utils.L.Error(err)
 			return err
 		}
-
-		post, err := http.NewRequest(http.MethodPost, r.endpoint, buf)
+		post, err := http.NewRequest(http.MethodPost, r.endpoint, bytes.NewBuffer(eventBytes))
 		if err != nil {
 			utils.L.Error(err)
 			return err

@@ -47,3 +47,9 @@ var watchIntervalFlag = cli.DurationFlag{
 	Value:  time.Duration(20 * time.Second),
 	EnvVar: "WATCH_INTERVAL",
 }
+
+var watchFlag = cli.StringFlag{
+	Name:   "watch",
+	Value:  "erc20,eth",
+	EnvVar: "WATCH",
+}

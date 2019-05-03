@@ -10,6 +10,12 @@ import (
 	"github.com/pkg/errors"
 )
 
+type Watch string
+
+func (w Watch) Contains(target string) bool {
+	return strings.Contains(strings.ToLower(string(w)), strings.ToLower(target))
+}
+
 type Config struct {
 	// rpc addr, should be one of http://, ws://, ipc
 	RpcAddr          string
@@ -17,6 +23,7 @@ type Config struct {
 	LogDir           string
 	DefaultReceivers []notifier.ReceiverConfig
 	WatchInterval    time.Duration
+	Watch            Watch
 }
 
 // Check config is valid.
@@ -27,6 +34,10 @@ func (c *Config) ValidCheck() error {
 
 	if len(c.WalletDir) == 0 {
 		return errors.New("WalletDir should not empty")
+	}
+
+	if len(c.Watch) == 0 {
+		return errors.New("Watch should not empty")
 	}
 
 	stat, err := os.Stat(c.WalletDir)

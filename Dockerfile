@@ -19,5 +19,5 @@ COPY --from=builder /go/src/app/bin/token-shout /
 EXPOSE 8001
 WORKDIR /
 
-CMD ["/token-shout", "run"]
+CMD ["/token-shout", "start"]
 

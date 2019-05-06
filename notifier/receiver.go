@@ -116,6 +116,7 @@ func (r *Receiver) Accept(event Event) {
 				} else {
 					// stop retrying if serious error happend
 					if !ShouldRetry(err) {
+						utils.L.Debugf("retry err: %v", err)
 						return
 					}
 

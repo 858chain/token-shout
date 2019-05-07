@@ -11,7 +11,8 @@ import (
 
 func main() {
 	app := cli.NewApp()
-	app.Name = "Eth / ERC20 token notification service"
+	app.Name = "Token shout"
+	app.Usage = "Eth / ERC20 token notification service"
 	app.Version = Version
 	app.Commands = []cli.Command{
 		startCmd,

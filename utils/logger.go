@@ -33,7 +33,7 @@ func InitLogger(logDir string) error {
 	L = &log.Logger{
 		Out:       logFile,
 		Formatter: new(log.JSONFormatter),
-		Level:     log.DebugLevel,
+		Level:     log.InfoLevel,
 	}
 
 	L.SetReportCaller(true)

@@ -88,11 +88,13 @@ func (r *Receiver) Accept(event Event) {
 		post.Header.Set("User-Agent", HTTP_USER_AGENT)
 		resp, err := r.client.Do(post)
 		if err != nil {
+			utils.L.Debugf("ErrShouldRetry : %v", err)
 			return ErrShouldRetry
 		}
 
 		// should retry if endpoint does not return status code 200
 		if resp.StatusCode != http.StatusOK {
+			utils.L.Debugf("ErrShouldRetry statusCode: %v", resp.StatusCode)
 			return ErrShouldRetry
 		}
 
@@ -112,6 +114,7 @@ func (r *Receiver) Accept(event Event) {
 			case <-backoffInterval.C:
 				err := sendFunc(event)
 				if err == nil {
+					utils.L.Debugf("sendFunc err: %v", err)
 					return
 				} else {
 					// stop retrying if serious error happend

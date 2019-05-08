@@ -14,6 +14,8 @@ RUN make
 
 FROM alpine:latest
 
+RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
+
 COPY --from=builder /go/src/app/bin/token-shout /
 
 EXPOSE 8001

@@ -6,6 +6,7 @@ import (
 
 	"github.com/858chain/token-shout/utils"
 
+	"github.com/gin-gonic/gin"
 	"github.com/urfave/cli"
 )
 
@@ -24,8 +25,12 @@ func main() {
 	}
 
 	app.Before = func(c *cli.Context) error {
-		//return utils.InitLogger(c.String("log-level"), c.String("log-dir"), "json")
-		return utils.InitLogger(c.String("log-dir"))
+		// default mode is release
+		gin.SetMode(gin.ReleaseMode)
+		if len(os.Getenv("DEV")) > 0 {
+			gin.SetMode(gin.DebugMode)
+		}
+		return utils.InitLogger(c.String("log-dir"), c.String("log-level"), "json")
 	}
 
 	err := app.Run(os.Args)

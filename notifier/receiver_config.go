@@ -10,10 +10,10 @@ import (
 
 // Config of receivers
 type ReceiverConfig struct {
-	RetryCount uint     `json:"retrycount"`
-	Endpoint   string   `json:"endpoint"`
-	Precision  float64  `json:"precision"`
-	EventTypes []string `json:"eventTypes"`
+	RetryCount          uint     `json:"retrycount"`
+	Endpoint            string   `json:"endpoint"`
+	NewBalanceRemaining float64  `json:"newBalanceRemaining"`
+	EventTypes          []string `json:"eventTypes"`
 
 	// address support the following format
 	//
@@ -33,8 +33,8 @@ func (rc ReceiverConfig) ValidCheck() error {
 		return err
 	}
 
-	if (rc.Precision) < 0 {
-		return errors.New("precision should greater than 0")
+	if (rc.NewBalanceRemaining) < 0 {
+		return errors.New("newBalanceRemaining should greater than 0")
 	}
 
 	if len(rc.EventTypes) == 0 {

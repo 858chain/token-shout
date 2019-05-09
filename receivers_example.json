@@ -5,7 +5,7 @@
       "erc20_log_event"
     ],
     "retryCount": 1,
-    "precision": 0.01,
+    "newBalanceRemaining": 0.01,
     "from": ["*"],
     "to": ["all-in-wallet"]
   },
@@ -14,7 +14,7 @@
       "eth_balance_change_event"
     ],
     "retryCount": 2,
-    "precision": 0.01,
+    "newBalanceRemaining": 0.01,
     "from": ["*"],
     "to": ["all-in-wallet", "0x9d8ec6a2cfe2a6abdf5a6041e752ba851abb4dbb"]
   }

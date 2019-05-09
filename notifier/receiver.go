@@ -3,6 +3,7 @@ package notifier
 import (
 	"bytes"
 	"errors"
+	"math"
 	"net/http"
 	"time"
 
@@ -21,6 +22,7 @@ func ShouldRetry(err error) bool {
 type Receiver struct {
 	retryCount    uint     `json:"retryCount"`
 	endpoint      string   `json:"endpoint"`
+	precision     float64  `json:"precision"`
 	eventTypes    []string `json:"evnetTypes"`
 	fromAddresses []string `json:"from"`
 	toAddresses   []string `json:"to"`
@@ -32,6 +34,7 @@ func NewReceiver(cfg ReceiverConfig) *Receiver {
 	return &Receiver{
 		retryCount:    cfg.RetryCount,
 		endpoint:      cfg.Endpoint,
+		precision:     cfg.Precision,
 		eventTypes:    cfg.EventTypes,
 		fromAddresses: cfg.FromAddresses,
 		toAddresses:   cfg.ToAddresses,
@@ -56,6 +59,24 @@ func (r *Receiver) Match(event Event) bool {
 	}
 
 	return false
+}
+
+func (r *Receiver) precisionMatch(event Event) bool {
+	newBalance, newBalanceFound := event.GetEvent()["newBalance"]
+	balance, balanceFound := event.GetEvent()["balance"]
+
+	if !newBalanceFound || !balanceFound {
+		return true
+	}
+
+	newBalanceCasted, newBalanceCastedOk := newBalance.(float64)
+	balanceCasted, balanceCastedOk := balance.(float64)
+
+	if !newBalanceCastedOk || !balanceCastedOk {
+		return true
+	}
+
+	return math.Abs(newBalanceCasted-balanceCasted) >= r.precision
 }
 
 // TODO

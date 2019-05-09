@@ -12,6 +12,7 @@ import (
 type ReceiverConfig struct {
 	RetryCount uint     `json:"retrycount"`
 	Endpoint   string   `json:"endpoint"`
+	Precision  float64  `json:"precision"`
 	EventTypes []string `json:"eventTypes"`
 
 	// address support the following format
@@ -32,8 +33,12 @@ func (rc ReceiverConfig) ValidCheck() error {
 		return err
 	}
 
+	if (rc.Precision) < 0 {
+		return errors.New("precision should greater than 0")
+	}
+
 	if len(rc.EventTypes) == 0 {
-		errors.New("eventTypes not provided")
+		return errors.New("eventTypes not provided")
 	}
 
 	// EventType should registered.

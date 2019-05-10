@@ -71,6 +71,8 @@ func (c *Client) balanceChecker(ctx context.Context, errCh chan error) {
 
 	checkFunc := func() {
 		utils.L.Infof("checking balance of total %d address", len(c.balanceCache))
+
+		balanceChangedMap := make(map[string]float64)
 		for address, balance := range c.balanceCache {
 			newBalance, err := c.getBalance(address)
 			if err != nil {
@@ -89,10 +91,15 @@ func (c *Client) balanceChecker(ctx context.Context, errCh chan error) {
 				})
 				c.noti.EventChan() <- event
 
-				c.lock.Lock()
-				c.balanceCache[address] = newBalance
-				c.lock.Unlock()
+				// temproary store changed balance
+				balanceChangedMap[address] = newBalance
 			}
+		}
+		// update balanceCache
+		for address, newBalance := range balanceChangedMap {
+			c.lock.Lock()
+			c.balanceCache[address] = newBalance
+			c.lock.Unlock()
 		}
 	}
 

@@ -67,10 +67,9 @@ func (c *Config) SanityAndValidCheck() error {
 	}
 
 	// rpcaddr format check
-	if !(strings.HasPrefix(c.RpcAddr, "http://") ||
-		strings.HasPrefix(c.RpcAddr, "ws://") ||
+	if !(strings.HasPrefix(c.RpcAddr, "ws://") ||
 		strings.HasSuffix(c.RpcAddr, ".ipc")) {
-		return errors.New("rpcaddr should like http://, ws:// or /xxx/xx/foo.ipc")
+		return errors.New("rpcaddr should like ws:// or /xxx/xx/foo.ipc")
 	}
 
 	if len(c.WatchList) == 0 {

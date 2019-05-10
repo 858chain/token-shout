@@ -28,7 +28,7 @@ var logDirFlag = cli.StringFlag{
 
 var rpcAddrFlag = cli.StringFlag{
 	Name:   "rpc-addr",
-	Value:  "http://192.168.0.101:8545",
+	Value:  "ws://192.168.0.101:8545",
 	EnvVar: "RPCADDR",
 }
 

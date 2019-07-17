@@ -1,5 +1,8 @@
-**Token shout** notify balance changes for both **ETH/ERC20** tokens, save registered upstream servics 
+**Token shout** notify balance changes for both **ETH/ERC20** tokens, save registered upstream servics
 from repeatly querying for any event/balance change from ethreum chains.
+
+
+[![version](https://img.shields.io/badge/version-0.1.1-yellow.svg)](https://semver.org)
 
 ## Run
 
@@ -84,5 +87,5 @@ before start token-shout, you shoud setting a **receivers.json** config. below i
 
 1、newBalanceRemaining： filter event by > 0.01 can trigger event  notification.
 
-2、retryCount: send notification msg retry count, when the consumer  return http status 200 code, the token shout service will confirm the msg is successful sending.  
+2、retryCount: send notification msg retry count, when the consumer  return http status 200 code, the token shout service will confirm the msg is successful sending.
 
